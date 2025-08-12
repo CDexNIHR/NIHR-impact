@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NIHR-Impact App</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 6h2v8h-2V6zm0 10h2v2h-2v-2z' fill='%23193E72'/%3E%3C/svg%3E">
+
+    <!-- Vuetify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vuetify@3.4.10/dist/vuetify.min.css">
+    
+    <!-- Material Design Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.x/css/materialdesignicons.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Roboto -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS for utility classes like centering -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        /* Custom color scheme for the app */
+        :root {
+            /* NIHR Blue */
+            --v-theme-nihr-blue-100: #193E72;
+            --v-theme-nihr-blue-80: #475989;
+            --v-theme-nihr-blue-60: #747CA3;
+            --v-theme-nihr-blue-40: #A2A4C1;
+            --v-theme-nihr-blue-20: #D0D0E0;
+
+            /* NIHR Coral */
+            --v-theme-nihr-coral-100: #EA5D4E;
+            --v-theme-nihr-coral-80: #EC7C72;
+            --v-theme-nihr-coral-60: #F29E95;
+            --v-theme-nihr-coral-40: #F4BDB8;
+            --v-theme-nihr-coral-20: #F8DDDB;
+            
+            /* NIHR Aqua */
+            --v-theme-nihr-aqua-100: #2EA9B0;
+            --v-theme-nihr-aqua-80: #6FBAC0;
+            --v-theme-nihr-aqua-60: #9BCBD0;
+            --v-theme-nihr-aqua-40: #C1DDE0;
+            --v-theme-nihr-aqua-20: #E1EEF0;
+
+            /* NIHR Green */
+            --v-theme-nihr-green-100: #46A86C;
+            --v-theme-nihr-green-80: #79B989;
+            --v-theme-nihr-green-60: #A1CAA6;
+            --v-theme-nihr-green-40: #C4DDC5;
+            --v-theme-nihr-green-20: #E2EEE3;
+
+            /* NIHR Orange */
+            --v-theme-nihr-orange-100: #F29330;
+            --v-theme-nihr-orange-80: #F6AB5D;
+            --v-theme-nihr-orange-60: #F9C187;
+            --v-theme-nihr-orange-40: #FCD6B0;
+            --v-theme-nihr-orange-20: #FDEBD8;
+
+            /* NIHR Purple */
+            --v-theme-nihr-purple-100: #6667AD;
+            --v-theme-nihr-purple-80: #8482BE;
+            --v-theme-nihr-purple-60: #A2A0D0;
+            --v-theme-nihr-purple-40: #C1BFE1;
+            --v-theme-nihr-purple-20: #E0DFF1;
+
+            /* NIHR Yellow */
+            --v-theme-nihr-yellow-100: #FED47A;
+            --v-theme-nihr-yellow-80: #FFDC97;
+            --v-theme-nihr-yellow-60: #FFE5B2;
+            --v-theme-nihr-yellow-40: #FFEECD;
+            --v-theme-nihr-yellow-20: #FFF6E6;
+
+            /* NIHR Grey */
+            --v-theme-nihr-grey-100: #ACBCC3;
+            --v-theme-nihr-grey-80: #BECAD0;
+            --v-theme-nihr-grey-60: #CED6DB;
+            --v-theme-nihr-grey-40: #DFE3E7;
+            --v-theme-nihr-grey-20: #EFF1F3;
+
+            /* Default theme colors mapped to NIHR palette */
+            --v-theme-primary: var(--v-theme-nihr-blue-100);
+            --v-theme-secondary: var(--v-theme-nihr-coral-100);
+            --v-theme-accent: var(--v-theme-nihr-aqua-100);
+            --v-theme-background: var(--v-theme-nihr-grey-20);
+            --v-theme-surface: var(--v-theme-nihr-grey-40);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .centered-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="centered-content">
+        <v-app>
+            <!-- Main application content goes here -->
+            <v-main>
+                <v-container>
+                    <v-row justify="center">
+                        <v-col cols="12" sm="10" md="8" lg="6">
+                            <v-card class="elevation-12 rounded-xl">
+                                <v-card-title class="text-h4 font-weight-bold text-center py-6" style="background-color: var(--v-theme-primary); color: white;">
+                                    <v-icon left>mdi-seed-outline</v-icon>
+                                    Welcome to NIHR-Impact
+                                </v-card-title>
+                                <v-card-text class="pa-8 text-center text-lg-body-1 text-md-body-2" style="background-color: var(--v-theme-surface);">
+                                    <p v-if="loading" class="text-center text-sm-body-1">
+                                        Loading message from Firestore...
+                                        <v-progress-linear indeterminate color="primary"></v-progress-linear>
+                                    </p>
+                                    <div v-else>
+                                        <p class="mb-4">
+                                            {{ firestoreMessage.text }}
+                                        </p>
+                                        <v-divider class="my-4" color="var(--v-theme-secondary)"></v-divider>
+                                        <p class="font-italic text-sm-body-2">
+                                            - From Firestore
+                                        </p>
+                                    </div>
+                                </v-card-text>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-main>
+        </v-app>
+    </div>
+
+    <!-- Vue and Vuetify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.11/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.10/dist/vuetify.min.js"></script>
+
+    <script>
+        // Use a function to create and mount the Vue app
+        const app = Vue.createApp({
+            data() {
+                return {
+                    loading: true,
+                    firestoreMessage: { text: "No message loaded." }
+                };
+            },
+            mounted() {
+                // Initialize Firebase and Firestore, then fetch data.
+                this.initFirebase();
+            },
+            methods: {
+                initFirebase() {
+                    // **IMPORTANT**: Replace these placeholders with your actual project's config from the Firebase console
+                    const firebaseConfig = {
+                        apiKey: "YOUR_API_KEY",
+                        authDomain: "YOUR_AUTH_DOMAIN",
+                        projectId: "YOUR_PROJECT_ID",
+                        storageBucket: "YOUR_STORAGE_BUCKET",
+                        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                        appId: "YOUR_APP_ID"
+                    };
+
+                    // Initialize Firebase
+                    const firebaseApp = firebase.initializeApp(firebaseConfig);
+                    const db = firebaseApp.firestore();
+
+                    // Get a reference to the 'messages' collection
+                    const messagesRef = db.collection("messages");
+
+                    // Listen for real-time updates to the first document in the collection
+                    messagesRef.limit(1).onSnapshot(snapshot => {
+                        this.loading = false;
+                        if (snapshot.docs.length > 0) {
+                            this.firestoreMessage = snapshot.docs[0].data();
+                        } else {
+                            this.firestoreMessage.text = "No messages found in Firestore.";
+                        }
+                    }, error => {
+                        console.error("Error fetching data: ", error);
+                        this.loading = false;
+                        this.firestoreMessage.text = "Error loading message from Firestore.";
+                    });
+                }
+            }
+        });
+        
+        // Vuetify theme configuration
+        const vuetify = Vuetify.createVuetify({
+            theme: {
+                defaultTheme: 'light',
+                themes: {
+                    light: {
+                        dark: false,
+                        colors: {
+                            // Mapped to your NIHR palette
+                            primary: '#193E72',
+                            secondary: '#EA5D4E',
+                            accent: '#2EA9B0',
+                            nihrBlue100: '#193E72', nihrBlue80: '#475989', nihrBlue60: '#747CA3', nihrBlue40: '#A2A4C1', nihrBlue20: '#D0D0E0',
+                            nihrCoral100: '#EA5D4E', nihrCoral80: '#EC7C72', nihrCoral60: '#F29E95', nihrCoral40: '#F4BDB8', nihrCoral20: '#F8DDDB',
+                            nihrAqua100: '#2EA9B0', nihrAqua80: '#6FBAC0', nihrAqua60: '#9BCBD0', nihrAqua40: '#C1DDE0', nihrAqua20: '#E1EEF0',
+                            nihrGreen100: '#46A86C', nihrGreen80: '#79B989', nihrGreen60: '#A1CAA6', nihrGreen40: '#C4DDC5', nihrGreen20: '#E2EEE3',
+                            nihrOrange100: '#F29330', nihrOrange80: '#F6AB5D', nihrOrange60: '#F9C187', nihrOrange40: '#FCD6B0', nihrOrange20: '#FDEBD8',
+                            nihrPurple100: '#6667AD', nihrPurple80: '#8482BE', nihrPurple60: '#A2A0D0', nihrPurple40: '#C1BFE1', nihrPurple20: '#E0DFF1',
+                            nihrYellow100: '#FED47A', nihrYellow80: '#FFDC97', nihrYellow60: '#FFE5B2', nihrYellow40: '#FFEECD', nihrYellow20: '#FFF6E6',
+                            nihrGrey100: '#ACBCC3', nihrGrey80: '#BECAD0', nihrGrey60: '#CED6DB', nihrGrey40: '#DFE3E7', nihrGrey20: '#EFF1F3'
+                        },
+                    },
+                },
+            },
+        });
+        
+        // Tell the app to use Vuetify and then mount it to the #app element
+        app.use(vuetify).mount('#app');
+    </script>
+</body>
+</html>

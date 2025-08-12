@@ -5,13 +5,13 @@
         <v-row justify="center">
           <v-col cols="12" sm="10" md="8" lg="6">
             <v-card class="elevation-12 rounded-xl">
-              <v-card-title class="text-h4 font-weight-bold text-center py-6" :style="{ backgroundColor: theme.colors.primary, color: 'white' }">
+              <v-card-title class="text-h4 font-weight-bold text-center py-6" :style="{ backgroundColor: theme.themes.value.colors.primary, color: 'white' }">
                 <v-icon left>mdi-seed-outline</v-icon>
                 Welcome to NIHR-Impact
               </v-card-title>
 
               <!-- Authentication Form -->
-              <v-card-text v-if="!user" class="pa-8 text-center" :style="{ backgroundColor: theme.colors.surface }">
+              <v-card-text v-if="!user" class="pa-8 text-center" :style="{ backgroundColor: theme.themes.value.colors.surface }">
                 <p class="mb-4 text-lg-body-1">
                   Please sign in to continue.
                 </p>
@@ -29,7 +29,7 @@
               </v-card-text>
 
               <!-- Main App Content (after sign-in) -->
-              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: theme.colors.surface }">
+              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: theme.themes.value.colors.surface }">
                 <p v-if="loading" class="text-center text-sm-body-1">
                   Loading message from Firestore...
                   <v-progress-linear indeterminate color="primary"></v-progress-linear>
@@ -38,7 +38,7 @@
                   <p class="mb-4">
                     {{ firestoreMessage.text }}
                   </p>
-                  <v-divider class="my-4" :color="theme.colors.secondary"></v-divider>
+                  <v-divider class="my-4" :color="theme.themes.value.colors.secondary"></v-divider>
                   <p class="font-italic text-sm-body-2">
                     - From Firestore
                   </p>
@@ -65,10 +65,10 @@
 import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
 
-// Import Firebase Auth functions
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
+// Import Firebase App, Firestore, and Auth functions
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, onSnapshot, collection, query, limit } from "firebase/firestore";
 
 const theme = useTheme();
 
@@ -76,41 +76,26 @@ const loading = ref(true);
 const firestoreMessage = ref({ text: "No message loaded." });
 const user = ref(null);
 
-const initFirebase = () => {
-  // **IMPORTANT**: Replace these placeholders with your actual project's config from the Firebase console
-  const firebaseConfig = {
-      apiKey: "AIzaSyAO7-x1JjNyy22NluuY0eJwabqtrhdOz0o",
-      authDomain: "nihr-impact.firebaseapp.com",
-      projectId: "nihr-impact",
-      storageBucket: "nihr-impact.firebasestorage.app",
-      messagingSenderId: "282958109685",
-      appId: "1:282958109685:web:0d7acf68b20860e3191ebc",
-      measurementId: "G-SDCZ8YTNH8"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  //const analytics = getAnalytics(app); // This line is commented out as it's not being used, but it's good to keep here for future use.
-  const db = app.firestore();
-  const auth = getAuth(app);
-
-  // Set up auth state listener
-  onAuthStateChanged(auth, (authUser) => {
-    user.value = authUser;
-    if (authUser) {
-      // User is signed in, fetch data from Firestore
-      fetchFirestoreMessage(db);
-    } else {
-      // User is signed out
-      loading.value = false;
-      firestoreMessage.value.text = "Sign in to see your message.";
-    }
-  });
+// **IMPORTANT**: Keep your firebaseConfig here
+const firebaseConfig = {
+    apiKey: "AIzaSyAO7-x1JjNyy22NluuY0eJwabqtrhdOz0o",
+    authDomain: "nihr-impact.firebaseapp.com",
+    projectId: "nihr-impact",
+    storageBucket: "nihr-impact.firebasestorage.app",
+    messagingSenderId: "282958109685",
+    appId: "1:282958109685:web:0d7acf68b20860e3191ebc",
+    measurementId: "G-SDCZ8YTNH8"
 };
 
-const fetchFirestoreMessage = (db) => {
-  const messagesRef = db.collection("messages");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  messagesRef.limit(1).onSnapshot(snapshot => {
+const fetchFirestoreMessage = () => {
+  const messagesRef = collection(db, "messages");
+  const q = query(messagesRef, limit(1));
+
+  onSnapshot(q, snapshot => {
       loading.value = false;
       if (snapshot.docs.length > 0) {
           firestoreMessage.value = snapshot.docs[0].data();
@@ -126,7 +111,6 @@ const fetchFirestoreMessage = (db) => {
 
 const signInWithGoogle = async () => {
   const provider = new GoogleAuthProvider();
-  const auth = getAuth();
   try {
     await signInWithPopup(auth, provider);
   } catch (error) {
@@ -135,7 +119,6 @@ const signInWithGoogle = async () => {
 };
 
 const signOutUser = async () => {
-  const auth = getAuth();
   try {
     await signOut(auth);
   } catch (error) {
@@ -144,6 +127,14 @@ const signOutUser = async () => {
 };
 
 onMounted(() => {
-  initFirebase();
+  onAuthStateChanged(auth, (authUser) => {
+    user.value = authUser;
+    if (authUser) {
+      fetchFirestoreMessage();
+    } else {
+      loading.value = false;
+      firestoreMessage.value.text = "Sign in to see your message.";
+    }
+  });
 });
 </script>

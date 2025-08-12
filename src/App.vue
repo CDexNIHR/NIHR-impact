@@ -35,6 +35,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
 const theme = useTheme();
 
@@ -44,15 +46,17 @@ const firestoreMessage = ref({ text: "No message loaded." });
 const initFirebase = () => {
   // **IMPORTANT**: Replace these placeholders with your actual project's config from the Firebase console
   const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyAO7-x1JjNyy22NluuY0eJwabqtrhdOz0o",
+      authDomain: "nihr-impact.firebaseapp.com",
+      projectId: "nihr-impact",
+      storageBucket: "nihr-impact.firebasestorage.app",
+      messagingSenderId: "282958109685",
+      appId: "1:282958109685:web:0d7acf68b20860e3191ebc",
+      measurementId: "G-SDCZ8YTNH8"
   };
 
-  const firebaseApp = firebase.initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
+	const analytics = getAnalytics(app);
   const db = firebaseApp.firestore();
 
   const messagesRef = db.collection("messages");

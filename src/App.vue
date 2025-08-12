@@ -9,7 +9,27 @@
                 <v-icon left>mdi-seed-outline</v-icon>
                 Welcome to NIHR-Impact
               </v-card-title>
-              <v-card-text class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: theme.colors.surface }">
+
+              <!-- Authentication Form -->
+              <v-card-text v-if="!user" class="pa-8 text-center" :style="{ backgroundColor: theme.colors.surface }">
+                <p class="mb-4 text-lg-body-1">
+                  Please sign in to continue.
+                </p>
+                <v-form @submit.prevent="signInWithGoogle">
+                  <v-btn
+                    color="nihrBlue100"
+                    class="white--text"
+                    type="submit"
+                    block
+                  >
+                    <v-icon left>mdi-google</v-icon>
+                    Sign In with Google
+                  </v-btn>
+                </v-form>
+              </v-card-text>
+
+              <!-- Main App Content (after sign-in) -->
+              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: theme.colors.surface }">
                 <p v-if="loading" class="text-center text-sm-body-1">
                   Loading message from Firestore...
                   <v-progress-linear indeterminate color="primary"></v-progress-linear>
@@ -22,6 +42,15 @@
                   <p class="font-italic text-sm-body-2">
                     - From Firestore
                   </p>
+                  <v-btn
+                    color="nihrCoral100"
+                    class="white--text mt-4"
+                    @click="signOutUser"
+                    block
+                  >
+                    <v-icon left>mdi-logout</v-icon>
+                    Sign Out
+                  </v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -35,6 +64,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useTheme } from 'vuetify';
+
+// Import Firebase Auth functions
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 
@@ -42,6 +74,7 @@ const theme = useTheme();
 
 const loading = ref(true);
 const firestoreMessage = ref({ text: "No message loaded." });
+const user = ref(null);
 
 const initFirebase = () => {
   // **IMPORTANT**: Replace these placeholders with your actual project's config from the Firebase console
@@ -56,9 +89,25 @@ const initFirebase = () => {
   };
 
   const app = initializeApp(firebaseConfig);
-	const analytics = getAnalytics(app);
-  const db = firebaseApp.firestore();
+  //const analytics = getAnalytics(app); // This line is commented out as it's not being used, but it's good to keep here for future use.
+  const db = app.firestore();
+  const auth = getAuth(app);
 
+  // Set up auth state listener
+  onAuthStateChanged(auth, (authUser) => {
+    user.value = authUser;
+    if (authUser) {
+      // User is signed in, fetch data from Firestore
+      fetchFirestoreMessage(db);
+    } else {
+      // User is signed out
+      loading.value = false;
+      firestoreMessage.value.text = "Sign in to see your message.";
+    }
+  });
+};
+
+const fetchFirestoreMessage = (db) => {
   const messagesRef = db.collection("messages");
 
   messagesRef.limit(1).onSnapshot(snapshot => {
@@ -73,6 +122,25 @@ const initFirebase = () => {
       loading.value = false;
       firestoreMessage.value.text = "Error loading message from Firestore.";
   });
+};
+
+const signInWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  const auth = getAuth();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    console.error("Google Sign-In error: ", error);
+  }
+};
+
+const signOutUser = async () => {
+  const auth = getAuth();
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Sign-out error: ", error);
+  }
 };
 
 onMounted(() => {

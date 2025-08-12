@@ -5,20 +5,20 @@
         <v-row justify="center">
           <v-col cols="12" sm="10" md="8" lg="6">
             <v-card class="elevation-12 rounded-xl">
-              <v-card-title class="text-h4 font-weight-bold text-center py-6" :style="{ backgroundColor: theme.themes.value.colors.primary, color: 'white' }">
+              <v-card-title class="text-h4 font-weight-bold text-center py-6 bg-primary text-white">
                 <v-icon left>mdi-seed-outline</v-icon>
                 Welcome to NIHR-Impact
               </v-card-title>
 
               <!-- Authentication Form -->
-              <v-card-text v-if="!user" class="pa-8 text-center" :style="{ backgroundColor: theme.themes.value.colors.surface }">
+              <v-card-text v-if="!user" class="pa-8 text-center bg-surface">
                 <p class="mb-4 text-lg-body-1">
                   Please sign in to continue.
                 </p>
                 <v-form @submit.prevent="signInWithGoogle">
                   <v-btn
                     color="nihrBlue100"
-                    class="white--text"
+                    class="text-white"
                     type="submit"
                     block
                   >
@@ -29,7 +29,7 @@
               </v-card-text>
 
               <!-- Main App Content (after sign-in) -->
-              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: theme.themes.value.colors.surface }">
+              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2 bg-surface">
                 <p v-if="loading" class="text-center text-sm-body-1">
                   Loading message from Firestore...
                   <v-progress-linear indeterminate color="primary"></v-progress-linear>
@@ -38,13 +38,13 @@
                   <p class="mb-4">
                     {{ firestoreMessage.text }}
                   </p>
-                  <v-divider class="my-4" :color="theme.themes.value.colors.secondary"></v-divider>
+                  <v-divider class="my-4" color="secondary"></v-divider>
                   <p class="font-italic text-sm-body-2">
                     - From Firestore
                   </p>
                   <v-btn
                     color="nihrCoral100"
-                    class="white--text mt-4"
+                    class="text-white mt-4"
                     @click="signOutUser"
                     block
                   >

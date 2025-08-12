@@ -5,13 +5,13 @@
         <v-row justify="center">
           <v-col cols="12" sm="10" md="8" lg="6">
             <v-card class="elevation-12 rounded-xl">
-              <v-card-title class="text-h4 font-weight-bold text-center py-6 bg-primary text-white">
+              <v-card-title class="text-h4 font-weight-bold text-center py-6" :style="{ backgroundColor: themeColors.primary, color: 'white' }">
                 <v-icon left>mdi-seed-outline</v-icon>
                 Welcome to NIHR-Impact
               </v-card-title>
 
               <!-- Authentication Form -->
-              <v-card-text v-if="!user" class="pa-8 text-center bg-surface">
+              <v-card-text v-if="!user" class="pa-8 text-center" :style="{ backgroundColor: themeColors.surface }">
                 <p class="mb-4 text-lg-body-1">
                   Please sign in to continue.
                 </p>
@@ -29,7 +29,7 @@
               </v-card-text>
 
               <!-- Main App Content (after sign-in) -->
-              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2 bg-surface">
+              <v-card-text v-else class="pa-8 text-center text-lg-body-1 text-md-body-2" :style="{ backgroundColor: themeColors.surface }">
                 <p v-if="loading" class="text-center text-sm-body-1">
                   Loading message from Firestore...
                   <v-progress-linear indeterminate color="primary"></v-progress-linear>
@@ -38,7 +38,7 @@
                   <p class="mb-4">
                     {{ firestoreMessage.text }}
                   </p>
-                  <v-divider class="my-4" color="secondary"></v-divider>
+                  <v-divider class="my-4" :color="themeColors.secondary"></v-divider>
                   <p class="font-italic text-sm-body-2">
                     - From Firestore
                   </p>
@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useTheme } from 'vuetify';
 
 // Import Firebase App, Firestore, and Auth functions
@@ -75,6 +75,11 @@ const theme = useTheme();
 const loading = ref(true);
 const firestoreMessage = ref({ text: "No message loaded." });
 const user = ref(null);
+
+// Create a computed property to safely access the theme colors
+const themeColors = computed(() => {
+  return theme.current.value.colors;
+});
 
 // **IMPORTANT**: Keep your firebaseConfig here
 const firebaseConfig = {
